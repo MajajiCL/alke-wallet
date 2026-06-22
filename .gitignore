@@ -1,0 +1,19 @@
+# Maven build outputs
+target/
+*.releaseBackup
+
+# IDE directories and files
+.idea/
+*.iml
+*.iws
+*.ipr
+.settings/
+.classpath
+.project
+.metadata/
+bin/
+
+# Temporary and log files
+*.log
+.DS_Store
+Thumbs.db
