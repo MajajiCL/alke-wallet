@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alke Wallet - Simulador Interactivo</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --card-gradient: linear-gradient(135deg, #6366f1, #3b82f6);
+            --terminal-bg: #0b0f19;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b, var(--bg-color));
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            background: linear-gradient(to right, #a5b4fc, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 20px;
+            max-width: 1300px;
+            width: 100%;
+            margin: 0 auto;
+            flex-grow: 1;
+        }
+
+        @media (max-width: 968px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Dashboard Panel */
+        .dashboard-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.8s ease;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* Wallet Card */
+        .wallet-card {
+            background: var(--card-gradient);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .wallet-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .wallet-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 250px;
+            height: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-chip {
+            width: 45px;
+            height: 35px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 6px;
+        }
+
+        .card-brand {
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+        }
+
+        .card-balance-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .card-balance {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        .card-holder {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .holder-name {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .holder-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* Exchange Grid */
+        .exchange-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .exchange-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .exchange-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .exchange-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        /* Transaction Log */
+        .transaction-section {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .transaction-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            max-height: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 5px;
+        }
+
+        .transaction-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .transaction-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .transaction-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .transaction-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tx-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .tx-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .tx-date {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .tx-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .tx-deposit {
+            color: var(--accent-green);
+        }
+
+        .tx-withdrawal {
+            color: var(--accent-red);
+        }
+
+        /* Terminal Panel */
+        .terminal-panel {
+            background: var(--terminal-bg);
+            border: 1px solid #1e293b;
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            animation: slideUp 1s ease;
+        }
+
+        .terminal-header {
+            background: #111827;
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 6px;
+        }
+
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot-red { background: #ef4444; }
+        .dot-yellow { background: #f59e0b; }
+        .dot-green { background: #10b981; }
+
+        .terminal-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .terminal-body {
+            padding: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 520px;
+        }
+
+        .terminal-line {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .terminal-input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 10px;
+        }
+
+        .terminal-prompt {
+            color: var(--accent-green);
+            font-weight: 700;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            flex-grow: 1;
+            caret-color: var(--accent-green);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🛠️ Alke Wallet - Simulador de Consola</h1>
+        <p>Interactúa con la consola de Java en la derecha y observa el Dashboard visual actualizarse en la izquierda.</p>
+    </header>
+
+    <div class="container">
+        <!-- Dashboard Panel -->
+        <div class="dashboard-panel">
+            <div>
+                <h3 class="section-title">Tarjeta Activa</h3>
+                <div class="wallet-card" id="wallet-card-element">
+                    <div class="card-header">
+                        <div class="card-chip"></div>
+                        <div class="card-brand" id="card-currency">USD</div>
+                    </div>
+                    <div class="card-balance-label">Saldo Disponible</div>
+                    <div class="card-balance" id="card-balance-display">US$ 500.00</div>
+                    <div class="card-holder">
+                        <div>
+                            <div class="card-balance-label">Titular</div>
+                            <div class="holder-name" id="card-name-display">Constanza Gomez</div>
+                        </div>
+                        <div class="holder-id" id="card-id-display">Cuenta N°: 1001</div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="section-title">Tipos de Cambio Actuales</h3>
+                <div class="exchange-grid">
+                    <div class="exchange-card">
+                        <div class="exchange-label">1 USD a EUR</div>
+                        <div class="exchange-value">0.92 €</div>
+                    </div>
+                    <div class="exchange-card">
+                        <div class="exchange-label">1 USD a CLP</div>
+                        <div class="exchange-value">909.09 CLP$</div>
+                    </div>
+                    <div class="exchange-card">
+                        <div class="exchange-label">1 EUR a CLP</div>
+                        <div class="exchange-value">981.82 CLP$</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transaction-section">
+                <h3 class="section-title">Historial de Movimientos</h3>
+                <div class="transaction-list" id="transaction-log-container">
+                    <!-- Transactions go here -->
+                    <div class="transaction-item">
+                        <div class="tx-info">
+                            <span class="tx-title">Depósito Inicial (Semilla)</span>
+                            <span class="tx-date">Historial de inicio</span>
+                        </div>
+                        <span class="tx-amount tx-deposit">+500.00 US$</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Panel -->
+        <div class="terminal-panel">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="terminal-dot dot-red"></div>
+                    <div class="terminal-dot dot-yellow"></div>
+                    <div class="terminal-dot dot-green"></div>
+                </div>
+                <span class="terminal-title">Main.java - Consola Interactiva</span>
+            </div>
+            <div class="terminal-body" id="terminal-body-container">
+                <!-- CLI Text lines will render here -->
+            </div>
+            <div class="terminal-header" style="border-top: 1px solid #1e293b; border-bottom: none;">
+                <div class="terminal-input-row" style="width: 100%;">
+                    <span class="terminal-prompt">&gt;</span>
+                    <input type="text" class="terminal-input" id="cli-terminal-input" autofocus placeholder="Escribe un comando..." autocomplete="off">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Business state representation mimicking Main.java
+        const state = {
+            accounts: [
+                {
+                    accountId: 1001,
+                    user: { name: "Constanza Gomez", email: "constanza@alkemy.com" },
+                    balance: 500.0,
+                    currency: "USD",
+                    symbol: "US$"
+                }
+            ],
+            activeIndex: 0,
+            transactions: [
+                {
+                    accountId: 1001,
+                    type: "DEPOSIT",
+                    amount: 500.0,
+                    currency: "USD",
+                    date: new Date().toLocaleTimeString()
+                }
+            ],
+            // State machine parameters for terminal conversation flow
+            cliState: "MENU",
+            // Input storage buffer
+            tempUser: {},
+            tempConvert: {},
+            tempAmount: 0
+        };
+
+        const currencies = {
+            USD: { rateToUSD: 1.0, symbol: "US$" },
+            EUR: { rateToUSD: 1.08, symbol: "€" },
+            CLP: { rateToUSD: 0.0011, symbol: "CLP$" }
+        };
+
+        const terminal = document.getElementById("terminal-body-container");
+        const cliInput = document.getElementById("cli-terminal-input");
+
+        // Helper to output to the CLI panel
+        function printLine(text, type = "") {
+            const line = document.createElement("div");
+            line.className = "terminal-line " + type;
+            line.textContent = text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function clearTerminal() {
+            terminal.innerHTML = "";
+        }
+
+        // Updates Dashboard GUI elements to match active wallet state
+        function updateDashboardUI() {
+            const active = state.accounts[state.activeIndex];
+            if (!active) return;
+
+            document.getElementById("card-currency").textContent = active.currency;
+            document.getElementById("card-balance-display").textContent = `${active.symbol} ${active.balance.toFixed(2)}`;
+            document.getElementById("card-name-display").textContent = active.user.name;
+            document.getElementById("card-id-display").textContent = `Cuenta N°: ${active.accountId}`;
+
+            // Update Card Color depending on currency
+            const cardElement = document.getElementById("wallet-card-element");
+            if (active.currency === "USD") {
+                cardElement.style.background = "linear-gradient(135deg, #6366f1, #3b82f6)";
+                cardElement.style.boxShadow = "0 8px 24px rgba(99, 102, 241, 0.3)";
+            } else if (active.currency === "EUR") {
+                cardElement.style.background = "linear-gradient(135deg, #8b5cf6, #ec4899)";
+                cardElement.style.boxShadow = "0 8px 24px rgba(139, 92, 246, 0.3)";
+            } else {
+                cardElement.style.background = "linear-gradient(135deg, #10b981, #059669)";
+                cardElement.style.boxShadow = "0 8px 24px rgba(16, 185, 129, 0.3)";
+            }
+
+            // Update transactions list
+            const logContainer = document.getElementById("transaction-log-container");
+            logContainer.innerHTML = "";
+            
+            // Filter transactions for this active account
+            const activeTxs = state.transactions.filter(t => t.accountId === active.accountId);
+            
+            if (activeTxs.length === 0) {
+                logContainer.innerHTML = '<div style="color:var(--text-muted); font-size:0.9rem; text-align:center; padding: 20px 0;">No hay movimientos aún.</div>';
+            } else {
+                [...activeTxs].reverse().forEach(tx => {
+                    const item = document.createElement("div");
+                    item.className = "transaction-item";
+                    
+                    const sign = tx.type === "DEPOSIT" ? "+" : "-";
+                    const classType = tx.type === "DEPOSIT" ? "tx-deposit" : "tx-withdrawal";
+                    const label = tx.type === "DEPOSIT" ? "Ingreso de dinero" : "Retiro de dinero";
+
+                    item.innerHTML = `
+                        <div class="tx-info">
+                            <span class="tx-title">${label}</span>
+                            <span class="tx-date">${tx.date}</span>
+                        </div>
+                        <span class="tx-amount ${classType}">${sign}${tx.amount.toFixed(2)} ${tx.currency}</span>
+                    `;
+                    logContainer.appendChild(item);
+                });
+            }
+        }
+
+        // Initialize state machine
+        function printMenu() {
+            printLine("==================================================");
+            printLine("          🌟 BIENVENIDO A ALKE WALLET 🌟          ");
+            printLine("    La solución digital de Alkemy Digital fintech ");
+            printLine("==================================================");
+            const active = state.accounts[state.activeIndex];
+            if (active) {
+                printLine(`Cuenta activa: ${active.user.name} (${active.currency}) | Saldo: ${active.balance.toFixed(2)} ${active.symbol}`);
+            }
+            printLine("==================================================");
+            printLine("");
+            printLine("--- MENÚ DE OPERACIONES ---");
+            printLine("1. Registrar nuevo usuario y crear cuenta");
+            printLine("2. Cambiar/Seleccionar cuenta activa");
+            printLine("3. Consultar saldo actual");
+            printLine("4. Depositar dinero");
+            printLine("5. Retirar dinero");
+            printLine("6. Convertir saldo a otra moneda");
+            printLine("7. Ver historial de transacciones");
+            printLine("8. Salir");
+            printLine("---------------------------");
+            printLine("Seleccione una opción: ");
+        }
+
+        // Convert function matching Java business logic
+        function convertCurrency(amount, from, to) {
+            const amountInUSD = amount * currencies[from].rateToUSD;
+            return amountInUSD / currencies[to].rateToUSD;
+        }
+
+        // Handle enter key to capture commands in terminal
+        cliInput.addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                const input = cliInput.value.trim();
+                cliInput.value = "";
+                
+                printLine("> " + input, "terminal-prompt");
+                handleCLIInput(input);
+            }
+        });
+
+        // Main Java state machine processor
+        function handleCLIInput(input) {
+            switch (state.cliState) {
+                case "MENU":
+                    processMenuChoice(input);
+                    break;
+
+                // Flow 1: Create Account
+                case "CREATE_NAME":
+                    if (!input) {
+                        printLine("[ERROR] El nombre no puede estar vacío.");
+                        promptMainMenu();
+                        break;
+                    }
+                    state.tempUser.name = input;
+                    state.cliState = "CREATE_EMAIL";
+                    printLine("Ingrese correo electrónico: ");
+                    break;
+                case "CREATE_EMAIL":
+                    if (!input || !input.includes("@")) {
+                        printLine("[ERROR] Correo electrónico inválido.");
+                        promptMainMenu();
+                        break;
+                    }
+                    state.tempUser.email = input;
+                    state.cliState = "CREATE_PASSWORD";
+                    printLine("Ingrese contraseña: ");
+                    break;
+                case "CREATE_PASSWORD":
+                    if (input.length < 4) {
+                        printLine("[ERROR] La contraseña debe tener al menos 4 caracteres.");
+                        promptMainMenu();
+                        break;
+                    }
+                    state.tempUser.password = input;
+                    state.cliState = "CREATE_CURRENCY";
+                    printLine("Seleccione tipo de moneda para su cuenta:");
+                    printLine("1. CLP$ (Peso Chileno)");
+                    printLine("2. US$ (Dólar Americano)");
+                    printLine("3. € (Euro)");
+                    printLine("Selección: ");
+                    break;
+                case "CREATE_CURRENCY":
+                    let curr = "USD";
+                    if (input === "1") curr = "CLP";
+                    else if (input === "3") curr = "EUR";
+                    else if (input !== "2") {
+                        printLine("[WARNING] Selección inválida. Se asignará USD por defecto.");
+                    }
+                    
+                    const newAccId = 1001 + state.accounts.length;
+                    const newAcc = {
+                        accountId: newAccId,
+                        user: { name: state.tempUser.name, email: state.tempUser.email },
+                        balance: 0.0,
+                        currency: curr,
+                        symbol: currencies[curr].symbol
+                    };
+                    state.accounts.push(newAcc);
+                    state.activeIndex = state.accounts.length - 1;
+
+                    printLine("");
+                    printLine("[ÉXITO] ¡Usuario registrado con éxito!");
+                    printLine(`Titular: ${newAcc.user.name} | Cuenta N°: ${newAcc.accountId} | Moneda: ${newAcc.currency} | Saldo Inicial: 0.00 ${newAcc.symbol}`);
+                    updateDashboardUI();
+                    promptMainMenu();
+                    break;
+
+                // Flow 2: Change active account
+                case "SELECT_ACTIVE":
+                    const choice = parseInt(input);
+                    if (isNaN(choice) || choice <= 0 || choice > state.accounts.length) {
+                        printLine("[ERROR] Selección inválida.");
+                    } else {
+                        state.activeIndex = choice - 1;
+                        printLine("[ÉXITO] Cuenta activa cambiada a: " + state.accounts[state.activeIndex].user.name);
+                        updateDashboardUI();
+                    }
+                    promptMainMenu();
+                    break;
+
+                // Flow 4: Deposit
+                case "DEPOSIT_AMOUNT":
+                    const depAmt = parseFloat(input);
+                    if (isNaN(depAmt) || depAmt <= 0) {
+                        printLine("[ERROR] El monto a depositar debe ser mayor que cero.");
+                    } else {
+                        const acc = state.accounts[state.activeIndex];
+                        acc.balance += depAmt;
+                        state.transactions.push({
+                            accountId: acc.accountId,
+                            type: "DEPOSIT",
+                            amount: depAmt,
+                            currency: acc.currency,
+                            date: new Date().toLocaleTimeString()
+                        });
+                        printLine(`[ÉXITO] Depósito realizado con éxito. Nuevo saldo: ${acc.balance.toFixed(2)} ${acc.symbol}`);
+                        updateDashboardUI();
+                    }
+                    promptMainMenu();
+                    break;
+
+                // Flow 5: Withdrawal
+                case "WITHDRAW_AMOUNT":
+                    const wtdAmt = parseFloat(input);
+                    if (isNaN(wtdAmt) || wtdAmt <= 0) {
+                        printLine("[ERROR] El monto a retirar debe ser mayor que cero.");
+                    } else {
+                        const acc = state.accounts[state.activeIndex];
+                        if (wtdAmt > acc.balance) {
+                            printLine(`[TRANSACCIÓN DENEGADA] Fondos insuficientes. Saldo actual: ${acc.balance.toFixed(2)}, Monto solicitado: ${wtdAmt.toFixed(2)}`);
+                        } else {
+                            acc.balance -= wtdAmt;
+                            state.transactions.push({
+                                accountId: acc.accountId,
+                                type: "WITHDRAWAL",
+                                amount: wtdAmt,
+                                currency: acc.currency,
+                                date: new Date().toLocaleTimeString()
+                            });
+                            printLine(`[ÉXITO] Retiro realizado con éxito. Nuevo saldo: ${acc.balance.toFixed(2)} ${acc.symbol}`);
+                            updateDashboardUI();
+                        }
+                    }
+                    promptMainMenu();
+                    break;
+
+                // Flow 6: Currency conversion
+                case "CONVERT_CURR":
+                    let tc = "USD";
+                    if (input === "1") tc = "CLP";
+                    else if (input === "3") tc = "EUR";
+                    else if (input !== "2") {
+                        printLine("[ERROR] Selección de moneda no válida.");
+                        promptMainMenu();
+                        break;
+                    }
+                    state.tempConvert.target = tc;
+                    state.cliState = "CONVERT_MODE";
+                    printLine("¿Desea cotizar (1) una cantidad específica o (2) todo su saldo actual? (1/2): ");
+                    break;
+
+                case "CONVERT_MODE":
+                    const activeAcc = state.accounts[state.activeIndex];
+                    if (input === "2") {
+                        const res = convertCurrency(activeAcc.balance, activeAcc.currency, state.tempConvert.target);
+                        printLine("");
+                        printLine("--- RESULTADO DE LA COTIZACIÓN ---");
+                        printLine(`${activeAcc.balance.toFixed(2)} ${activeAcc.symbol} (${activeAcc.currency}) equivale a:`);
+                        printLine(`👉 ${res.toFixed(2)} ${currencies[state.tempConvert.target].symbol} (${state.tempConvert.target})`);
+                        printLine("----------------------------------");
+                        promptMainMenu();
+                    } else if (input === "1") {
+                        state.cliState = "CONVERT_AMOUNT";
+                        printLine("Ingrese la cantidad a cotizar: ");
+                    } else {
+                        printLine("[ERROR] Opción inválida.");
+                        promptMainMenu();
+                    }
+                    break;
+
+                case "CONVERT_AMOUNT":
+                    const amtVal = parseFloat(input);
+                    if (isNaN(amtVal) || amtVal < 0) {
+                        printLine("[ERROR] El monto a convertir no puede ser negativo.");
+                    } else {
+                        const act = state.accounts[state.activeIndex];
+                        const res = convertCurrency(amtVal, act.currency, state.tempConvert.target);
+                        printLine("");
+                        printLine("--- RESULTADO DE LA COTIZACIÓN ---");
+                        printLine(`${amtVal.toFixed(2)} ${act.symbol} (${act.currency}) equivale a:`);
+                        printLine(`👉 ${res.toFixed(2)} ${currencies[state.tempConvert.target].symbol} (${state.tempConvert.target})`);
+                        printLine("----------------------------------");
+                    }
+                    promptMainMenu();
+                    break;
+
+                // Press Enter to continue
+                case "CONTINUE":
+                    clearTerminal();
+                    state.cliState = "MENU";
+                    printMenu();
+                    break;
+            }
+        }
+
+        // Submenu selector for Main options
+        function processMenuChoice(choice) {
+            const active = state.accounts[state.activeIndex];
+
+            switch (choice) {
+                case "1":
+                    state.cliState = "CREATE_NAME";
+                    state.tempUser = {};
+                    printLine("\n--- REGISTRO DE NUEVO USUARIO ---");
+                    printLine("Ingrese nombre completo: ");
+                    break;
+                case "2":
+                    state.cliState = "SELECT_ACTIVE";
+                    printLine("\n--- SELECCIONAR CUENTA ACTIVA ---");
+                    state.accounts.forEach((acc, idx) => {
+                        printLine(`${idx + 1}. ${acc.user.name} - Cuenta N° ${acc.accountId} (${acc.currency}) | Saldo: ${acc.balance.toFixed(2)} ${acc.symbol}`);
+                    });
+                    printLine("Seleccione el número de cuenta: ");
+                    break;
+                case "3":
+                    printLine("\n========================================");
+                    printLine(`       ESTADO DE CUENTA (N° ${active.accountId})        `);
+                    printLine("========================================");
+                    printLine("Titular: " + active.user.name);
+                    printLine("Email: " + active.user.email);
+                    printLine(`Saldo disponible: ${active.balance.toFixed(2)} ${active.symbol} (${active.currency})`);
+                    printLine("========================================");
+                    promptMainMenu();
+                    break;
+                case "4":
+                    state.cliState = "DEPOSIT_AMOUNT";
+                    printLine("\nIngrese el monto a depositar: ");
+                    break;
+                case "5":
+                    state.cliState = "WITHDRAW_AMOUNT";
+                    printLine("\nIngrese el monto a retirar: ");
+                    break;
+                case "6":
+                    state.cliState = "CONVERT_CURR";
+                    state.tempConvert = {};
+                    printLine("\n--- CONVERSIÓN DE MONEDA ---");
+                    printLine(`Saldo actual en tu cuenta: ${active.balance.toFixed(2)} ${active.symbol}`);
+                    printLine("Seleccione la moneda a la que desea cotizar/convertir:");
+                    printLine("1. CLP$ (Peso Chileno)");
+                    printLine("2. US$ (Dólar Americano)");
+                    printLine("3. € (Euro)");
+                    printLine("Selección: ");
+                    break;
+                case "7":
+                    printLine("\n--- HISTORIAL DE TRANSACCIONES ---");
+                    const activeTxs = state.transactions.filter(t => t.accountId === active.accountId);
+                    if (activeTxs.length === 0) {
+                        printLine("No se han registrado transacciones aún.");
+                    } else {
+                        activeTxs.forEach((tx, idx) => {
+                            printLine(`[${tx.date}] ${tx.type === "DEPOSIT" ? "DEPOSIT" : "WITHDRAWAL"}: ${tx.amount.toFixed(2)} ${tx.currency} (ID: TX00${idx+1})`);
+                        });
+                    }
+                    printLine("----------------------------------");
+                    promptMainMenu();
+                    break;
+                case "8":
+                    printLine("\n¡Gracias por utilizar Alke Wallet! Hasta pronto.");
+                    cliInput.disabled = true;
+                    break;
+                default:
+                    printLine("\n[ERROR] Opción no válida. Por favor, intente de nuevo.");
+                    promptMainMenu();
+            }
+        }
+
+        // Prompts the "Press Enter to continue..." state
+        function promptMainMenu() {
+            state.cliState = "CONTINUE";
+            printLine("");
+            printLine("Presione Enter para continuar...");
+        }
+
+        // Initialize display
+        updateDashboardUI();
+        printMenu();
+    </script>
+</body>
+</html>
